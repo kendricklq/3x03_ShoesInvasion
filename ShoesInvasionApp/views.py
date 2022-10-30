@@ -1,6 +1,5 @@
 from asyncio.windows_events import NULL
 from decimal import Decimal
-from enum import unique
 import errno
 from multiprocessing import context
 from operator import truediv
@@ -23,8 +22,7 @@ from django.contrib import messages
 
 from ShoesInvasionApp.forms import RegisterForm
 from ShoesInvasionApp.forms import UserLoginForm
-from .models.user import UserTable 
-from .models.userDetails import UserDetailsTable
+from .models.user import UserTable
 import bcrypt
 
 from ShoesInvasionApp.models import user
@@ -43,8 +41,8 @@ from django.contrib.auth.hashers import check_password
 
 # Create your views here.
 def index(request):
-    # unique_id = request.session['unique_id']
-    # print("unique_id", unique_id)
+    unique_id = request.session['unique_id']
+    print("unique_id", unique_id)
     return render(request, 'ShoesInvasionApp/index.html')
 
 def about(request):
@@ -54,128 +52,91 @@ def contact(request):
     return render(request, 'ShoesInvasionApp/index.html#contact')
 
 def cart(request):
-    try:
-        if request.session.has_key('unique_id'):
-            print("Unique",request.session.get('unique_id'))
-            uid = request.session['unique_id']
-            cart = ShoppingCartTable.objects.filter(user=uid)
-            total = 0
-            for i in cart:
-                total = i.getCartTotal
+    if request.session.has_key('unique_id'):
+        print("Unique",request.session.get('unique_id'))
+        cart = ShoppingCartTable.objects.filter(user='H6XZ2K2UpHfrRODM0ghtD0A7KkoXEd5aM8UGNWpBFZfBHtTRDBZkObabVYwWKptSDRKOHKzCRWhRJeqGA4hFftxoC0NK12bePgnPzvmI5VN34XAXZUjzX80ncst3sFybtxjuD0bNuxKECD0xf0Vb3PTZtFkCYE7pbJIIaY7dXm3h0hLfHbbAedq0L1CmatxduzSAydTi')
+        total = 0
+        for i in cart:
+            total = i.getCartTotal
 
 
-            context = {
-                'cart':cart,
-                'cartTotal':total,
-                'user_id_string' : uid,
-            }
-            return render(request, 'ShoesInvasionApp/cart.html', context)
-        else:
-            return HttpResponseRedirect(request=request, template_name="ShoesInvasionApp/login_user.html")
-    except:
-        return redirect('login/')
+        context = {
+            'cart':cart,
+            'cartTotal':total,
+            'user_id_string' : 'H6XZ2K2UpHfrRODM0ghtD0A7KkoXEd5aM8UGNWpBFZfBHtTRDBZkObabVYwWKptSDRKOHKzCRWhRJeqGA4hFftxoC0NK12bePgnPzvmI5VN34XAXZUjzX80ncst3sFybtxjuD0bNuxKECD0xf0Vb3PTZtFkCYE7pbJIIaY7dXm3h0hLfHbbAedq0L1CmatxduzSAydTi',
+        }
+        return render(request, 'ShoesInvasionApp/cart.html', context)
+    else:
+        return HttpResponseRedirect(request=request, template_name="ShoesInvasionApp/login_user.html")
 
 # API CALL POINT 
 def update_cartItem(request):
-    try:
-        if request.session.has_key('unique_id'):
-            # Ensure deleting only when logged in. 
-            data = json.loads(request.body)
-            shoppingCartID = data['shoppingCartID']
-            action = data['action']
-            print(shoppingCartID)
-            print(action)
+    data = json.loads(request.body)
+    shoppingCartID = data['shoppingCartID']
+    action = data['action']
+    print(shoppingCartID)
+    print(action)
 
-            cartItem = ShoppingCartTable.objects.get(id = shoppingCartID)
-            
-            if action == "add":
-                cartItem.quantity = (cartItem.quantity + 1)
-                cartItem.total_price += cartItem.product.product_price 
-            elif action == 'remove':
-                cartItem.quantity = (cartItem.quantity - 1)
-                cartItem.total_price -= cartItem.product.product_price 
+    cartItem = ShoppingCartTable.objects.get(id = shoppingCartID)
+    
+    if action == "add":
+        cartItem.quantity = (cartItem.quantity + 1)
+        cartItem.total_price += cartItem.product.product_price 
+    elif action == 'remove':
+        cartItem.quantity = (cartItem.quantity - 1)
+        cartItem.total_price -= cartItem.product.product_price 
 
-            cartItem.save()
+    cartItem.save()
 
-            if cartItem.quantity <= 0:
-                cartItem.delete()
-            
-            return JsonResponse('Item was added', safe=False)
-        else:
-            return redirect('login/')
-
-    except:
-        return redirect('login/')
+    if cartItem.quantity <= 0:
+        cartItem.delete()
+    
+    return JsonResponse('Item was added', safe=False)
 
 def del_cartItem(request):
-    try:
-        # Ensure only deleting when logged in
-        if request.session.has_key('unique_id'):
-            data = json.loads(request.body)
-            shoppingCartID = data['shoppingCartID']
-            cartItem = ShoppingCartTable.objects.get(id = shoppingCartID)
-            cartItem.delete()
+    data = json.loads(request.body)
+    shoppingCartID = data['shoppingCartID']
+    cartItem = ShoppingCartTable.objects.get(id = shoppingCartID)
+    cartItem.delete()
 
-            return JsonResponse('Item was deleted', safe=False)
-        else:
-            return redirect('login/')
-    except:
-        return redirect('login/')
+    return JsonResponse('Item was deleted', safe=False)
 
 def checkout_cartItem(request):
-    try:
-        if request.session.has_key('unique_id'):
-            print("Unique",request.session.get('unique_id'))
-            uid = request.session['unique_id']
-            data = json.loads(request.body)
-            user_id = data['user_id']
-            userObj = UserTable.objects.get(unique_id=user_id)
+    data = json.loads(request.body)
+    user_id = data['user_id']
+    userObj = UserTable.objects.get(unique_id=user_id)
 
-            t = TransactionTable.objects.create(user=userObj)
-            t.save
+    t = TransactionTable.objects.create(user=userObj)
+    t.save
 
-            cartDetails = ShoppingCartTable.objects.filter(user = uid)
-            for i in cartDetails:
-                shoe = ProductsTable.objects.get(id = i.product.id)
-                tranDetails = TransactionDetailsTable.objects.create(transaction = t, product = shoe, quantity = i.quantity, size = i.size, amount = i.getCurrentProductTotal)
-                tranDetails.save
-                # Removing from shopping cart
-                cartItemToDel = ShoppingCartTable.objects.get(id = i.id)
-                cartItemToDel.delete()
-                
-            return JsonResponse('Shoes were sold', safe=False)
-        else:
-            return redirect('login/')
-    except:
-        return redirect('login/')
-
+    cartDetails = ShoppingCartTable.objects.filter(user = user_id)
+    for i in cartDetails:
+        shoe = ProductsTable.objects.get(id = i.product.id)
+        tranDetails = TransactionDetailsTable.objects.create(transaction = t, product = shoe, quantity = i.quantity, size = i.size, amount = i.getCurrentProductTotal)
+        tranDetails.save
+        # Removing from shopping cart
+        cartItemToDel = ShoppingCartTable.objects.get(id = i.id)
+        cartItemToDel.delete()
+        
+    return JsonResponse('Shoes were sold', safe=False)
 
 def add_to_cart(request):
-    try:
-        if request.session.has_key('unique_id'):
-            print("Unique",request.session.get('unique_id'))
-            uid = request.session['unique_id']
-            data = json.loads(request.body)
-            # {'color':color,'size':size,'quantity':quantity,'shoe_id':productID,'user_id':1 }
-            color = data['color']
-            size = data['size']
-            quantity = data['quantity']
-            shoe_id = data['shoe_id']
-            # user_id = data['user_id'] # Redundant 
+    data = json.loads(request.body)
+    # {'color':color,'size':size,'quantity':quantity,'shoe_id':productID,'user_id':1 }
+    color = data['color']
+    size = data['size']
+    quantity = data['quantity']
+    shoe_id = data['shoe_id']
+    user_id = data['user_id']
 
-            shoeObj = ProductsTable.objects.get(id=shoe_id)
-            userObj = UserTable.objects.get(unique_id=uid)
-            chosenTotalPrice = Decimal(shoeObj.product_price) * Decimal(quantity)
-            t = ShoppingCartTable.objects.create(user = userObj, product = shoeObj, quantity = quantity, size = size, color = color, total_price = chosenTotalPrice)
-            t.save
+    shoeObj = ProductsTable.objects.get(id=shoe_id)
+    userObj = UserTable.objects.get(id=user_id)
+    chosenTotalPrice = Decimal(shoeObj.product_price) * Decimal(quantity)
+    t = ShoppingCartTable.objects.create(user = userObj, product = shoeObj, quantity = quantity, size = size, color = color, total_price = chosenTotalPrice)
+    t.save
 
-            # Insert Shoe here 
-            return JsonResponse('Shoe Added', safe=False)
-        else:
-            # Not Logged In
-            return redirect('login/')
-    except:
-        return redirect('login/')
+    # Insert Shoe here 
+    return JsonResponse('Shoe Added', safe=False)
 
 # Just to render Payment Success Page
 def paymentSuccess(request):
@@ -258,99 +219,10 @@ def shop(request):
     }
     return render(request, 'ShoesInvasionApp/shop.html',context)
 
-def profilePage(request):
-    try:
-        if request.session.has_key('unique_id'):
-            # Logged In
-            uid = request.session['unique_id']
-            print(uid)
-            # uid = request.session.get('unique_id')
-            userObj = UserTable.objects.get(unique_id=uid)
-            userDetailsObj = UserDetailsTable.objects.get(unique_id=uid)
-            context = {
-                'firstname': userObj.first_name,
-                'lastname': userObj.last_name,
-                'username': userObj.username,
-                'email': userObj.email,
-                'phone': userObj.phone,
-                'address': userDetailsObj.address,
-            }
-            return render(request, 'ShoesInvasionApp/user-profile.html', context=context)
-        else:
-            # Not Logged In
-            return redirect('login/')
-            #return HttpResponseRedirect(request=request,template_name="ShoesInvasionApp/login_user.html") | Cannot work
-    except:
-        # Log 
-        # Redirect cause some error occured.
-        return redirect('login/')
-
-def viewUpdateProfilePage(request):
-    try:
-        if request.session.has_key('unique_id'):
-            # Logged In
-            uid = request.session['unique_id']
-            print(uid)
-            # uid = request.session.get('unique_id')
-            userObj = UserTable.objects.get(unique_id=uid)
-            userDetailsObj = UserDetailsTable.objects.get(unique_id=uid)
-            context = {
-                'firstname': userObj.first_name,
-                'lastname': userObj.last_name,
-                'username': userObj.username,
-                'email': userObj.email,
-                'phone': userObj.phone,
-                'address': userDetailsObj.address,
-            }
-            return render(request, 'ShoesInvasionApp/update-profile.html', context=context)
-        else:
-            # Not Logged In
-            return redirect('login/')
-    except:
-        # Log 
-        # Redirect cause some error occured.
-        return redirect('login/')
-
-def updateProfileDetails(request):
-    # Check for session | Logged In or Not
-    try:
-        uid = ""
-        if request.session.has_key('unique_id'):
-            uid = request.session['unique_id']
-            data = json.loads(request.body)
-            fname = data['fname']
-            lname = data['lname']
-            phone = data['phone']
-            address = data['address']
-
-            if (fname == "" or lname == "" or phone == "" or address == ""):
-                return redirect('profilePage')
-
-
-            userDetailObj = UserDetailsTable.objects.get(unique_id = uid)
-            userObj = UserTable.objects.get(unique_id = uid)
-            userDetailObj.address = address
-            userDetailObj.save()
-
-            userObj.first_name = fname
-            userObj.last_name = lname
-            userObj.phone = phone
-            
-            userObj.save()
-            return JsonResponse('Update Success', safe=False)
-        else:
-            # No UID 
-            return redirect('login/')
-    except:
-        # Log Error Message 
-        return JsonResponse('Exception Error', safe=False)
-
-
 def login_request(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        print("username: " + username)
         # print(request.POST['data-sitekey'])
         try:
             account = UserTable.objects.get(username=username)
@@ -360,10 +232,6 @@ def login_request(request):
                     # Right Password | Change Locked Counter to 0
                     account.lockedCounter = 0
                     account.save()
-                    # Store into Session
-                    request.session['unique_id'] = account.unique_id
-                    # print(request.session['unqiue_id'])
-                    # request.session['unqiue_id'] = account.unique_id
                     return render(request, 'ShoesInvasionApp/register_success.html')
                 else:
                     # Wrong Password | Need to append into Locked Counter
