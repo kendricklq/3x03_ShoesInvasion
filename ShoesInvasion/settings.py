@@ -32,17 +32,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SAMESITE = 'Lax'
 
 # Application definition
 
 INSTALLED_APPS = [
     # 'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
+    # 'django.contrib.contenttypes',
     'django.contrib.sessions',
     # 'django.contrib.messages',
     'ShoesInvasionApp.apps.ShoesInvasionAppConfig',
@@ -51,7 +47,6 @@ INSTALLED_APPS = [
     'django_forms_bootstrap',
     'bootstrap4',
     'crispy_forms',
-    'django.contrib.staticfiles', 
     'captcha',
 ]
 
