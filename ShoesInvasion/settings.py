@@ -100,7 +100,7 @@ DATABASES = {
         'NAME': 'ShoesInvasion',
         'USER': 'root',
         'PASSWORD': 'asif1234',
-        'HOST': '188.166.238.172',
+        'HOST': 'team-35_db1',
         'PORT': '3306',
     }
 }
