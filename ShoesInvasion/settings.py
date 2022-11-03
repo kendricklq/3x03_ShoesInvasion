@@ -99,8 +99,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ShoesInvasion',
         'USER': 'root',
-        'PASSWORD': 'asif1234',
-        'HOST': 'team-35_db1',
+        'PASSWORD': 'admin',
+        'HOST': 'db',
         'PORT': '3306',
     }
 }
