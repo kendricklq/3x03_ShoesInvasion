@@ -4,7 +4,6 @@ pipeline {
 		stage('Build') {
 			steps {
 				echo 'Building the application ...'
-				// sh 'pip install -r requirements.txt'
 			}
 		}
 
@@ -22,22 +21,16 @@ pipeline {
     }
 
             steps {
-                //echo 'Testing the application ...'
-				echo 'JUnit Test ...'
-				sh 'ls'
-				// sh 'python manage.py test'
-				/*
-				dir("${test_dir}"){
-					sh "python manage.py test"
-				} */
-				
+				echo 'Django Test ...'
+				sh 'python manage.py test'
             }
 	}
 	}	
 	post {
 		success {
 			dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-			// junit '**/target/*.xml'
 		}
 	}
 }
+
+
